@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONDAIENSYU</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="icon" href="/static/file/icon.png">
+    <style>
+        body{
+            background-color: rgb(241, 241, 241);
+        }
+        .answerBtn{
+            width: 11vw;
+        }
+        .answerBtn:hover{
+            background-color: rgb(255, 145, 0);
+        }
+        .bottomBox{
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .controlBtn{
+            position: fixed;
+            top: 4.5rem;
+            margin-left: 20px;
+        }
+        .leftSide{
+            position: fixed;
+            right: 10px;
+        }
+        canvas{
+            background-color: aliceblue;
+            position: fixed;
+            top: 120px;
+            width: 100vw;
+            height: 67vh;
+        }
+        .choseBtn{
+            background-color: rgb(255, 145, 0);
+        }
+        #StartScreen{
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 4.5rem;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgb(241, 241, 241);
+        }
+        /*StartScreen*/
+        .box{
+            padding: 30px;
+            align-content: center;
+            border: rgb(13,110,253) solid 3px;
+            margin: 30px;
+            text-align: center;
+            height: 70vh;
+        }
+        .logo{
+            font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            font-style: italic;
+            font-size: x-large;
+        }
+        .mes{
+            font-size: xx-large;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+        .btn-start{
+            padding-left: 50px;
+            padding-right: 50px;
+        }
+        #loadScreen{
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgb(49, 87, 164);
+        }
+        .mes2{
+            position: absolute;
+            color: white;
+            font-size: xx-large;
+            font-weight: bold;
+            text-align: center;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate(-50%,-50%);
+            transform: translate(-50%,-50%);
+
+            text-align: center;
+        }
+    </style>
+</head>
+<body style="padding-top: 4.5rem;">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+
+
+    <header>
+
+        <nav class="navbar navbar-dark bg-primary fixed-top">
+            <!-- Navbar content -->
+            <div class="container-fluid">
+                <a class="navbar-brand">MONDAIENSYU</a>
+                <div>
+                    <button type="button" class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="playClickAudio('tap');">終了</button>
+                </div>  
+            </div>
+        </nav>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">確認</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="playClickAudio('tap');"></button>
+                    </div>
+                    <div class="modal-body">
+                        本当に終了しますか？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="stop();">はい</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="playClickAudio('tap');">いいえ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </nav>
+    </header>
+
+    
+
+    <div class="controlBtn">
+        <button type="button" class="btn btn-primary fullBtn" onclick="fullScreen();">□</button>
+        <button type="button" class="btn btn-primary" onclick="clearPaint();">全消去</button>
+        <button type="button" class="btn btn-primary" onclick="modeChange();"><img src="/file/eraser.svg" id="mode"></button>
+    </div>
+    
+
+    <div class="leftSide">
+        <button type="button" class="btn btn-primary" onclick="showNotification();">♪</button>
+        <button type="button" class="btn btn-primary" onclick="clearChose();time=0;">リセット</button>
+    </div>
+
+    <canvas id="canva"></canvas>
+
+    <div class="centerBox bottomBox">
+        <button type="button" id="btn0" class="btn btn-primary answerBtn" onclick="choseBtn(0);">ア</button>
+        <button type="button" id="btn1" class="btn btn-primary answerBtn" onclick="choseBtn(1);">イ</button>
+        <button type="button" id="btn2" class="btn btn-primary answerBtn" onclick="choseBtn(2);">ウ</button>
+        <button type="button" id="btn3" class="btn btn-primary answerBtn" onclick="choseBtn(3);">エ</button>
+    </div>
+    
+    <script>
+
+        const AudioNotificationElm = new Audio(`/file/notification.mp3`);
+
+        function choseBtn(btnNum){
+            playClickAudio('tap');
+            clearChose();
+            var btnElm = document.getElementById(`btn${btnNum}`);
+            btnElm.classList = "btn btn-primary answerBtn choseBtn";
+        }
+
+        function clearChose(){
+            for(var i=0;i<4;i++){
+                var btnElm = document.getElementById(`btn${i}`);
+                btnElm.classList = "btn btn-primary answerBtn";
+            }
+            playClickAudio("tap");
+        }
+
+
+        var canvas = document.getElementById('canva');
+        var canvasObj = canvas.getContext("2d");
+
+        function setSize(){
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
+
+        setSize();
+                
+        canvas.addEventListener('mousedown',mouseDown);
+        canvas.addEventListener('mousemove',moveCnvas);
+        canvas.addEventListener('mouseup',mouseUp);
+
+        canvas.addEventListener('touchstart',mouseDown);
+        canvas.addEventListener('touchmove',moveCanvasTouch);
+        canvas.addEventListener('touchend',mouseUp);
+
+        addEventListener("fullscreenchange",fullScreenEvent);
+
+        var canvasTempW;
+        var canvasTempH;
+        var canTemp;
+        var mode = 1;
+
+        var modeBtn = document.getElementById('mode');
+
+        function playClickAudio(bgm){
+            const AudioElm = new Audio(`/file/tap.mp3`);
+            AudioElm.play();
+        }
+
+        function modeChange(){
+            playClickAudio('tap');
+            if(mode==1){
+                mode=0;
+                modeBtn.src = "/file/pen.svg";
+            }else if(mode==0){
+                mode=1;
+                modeBtn.src = "/file/eraser.svg";
+            }
+        }
+
+        function fullScreen(){ 
+            playClickAudio('tap');
+            canvasTempW = canvas.width;
+            canvasTempH = canvas.height; 
+            canTemp = canvasObj.getImageData(0,0,canvasTempW,canvasTempH);  
+            if(!document.fullscreenElement){
+                document.documentElement.requestFullscreen();
+                //canvas.style.height = "74vh";
+            }else if(document.exitFullscreen){
+                document.exitFullscreen();
+                //canvas.style.height = "67vh";
+            }
+        }
+
+        function clearPaint(){
+            playClickAudio('tap');
+            canvasObj.clearRect(0,0,canvas.width,canvas.height);
+            setSize();
+        }
+
+        function eraser(event){
+            var x = event.clientX-canvas.getBoundingClientRect().left;
+            var y = event.clientY-canvas.getBoundingClientRect().top;
+            canvasObj.clearRect(x,y,20,20);
+        }
+
+        function eraserTouch(event){
+            var x = event.touches[0].clientX-canvas.getBoundingClientRect().left;
+            var y = event.touches[0].clientY-canvas.getBoundingClientRect().top;
+            canvasObj.clearRect(x,y,20,20);
+        }
+
+        var tempX;
+        var tempY;
+        var flag = false;
+
+        function paint(event){
+            canvasObj.beginPath();
+            var x = event.clientX-canvas.getBoundingClientRect().left;
+            var y = event.clientY-canvas.getBoundingClientRect().top;
+            var canvasBox = canvas.getBoundingClientRect();
+            //console.log(x,y)
+            canvasObj.moveTo(tempX,tempY);
+            canvasObj.lineTo(x,y);
+            canvasObj.stroke();
+            canvasObj.closePath();
+            tempX = x;
+            tempY = y;
+        }
+
+        function paintTouch(event){
+            canvasObj.beginPath();
+            var x = event.touches[0].clientX-canvas.getBoundingClientRect().left;
+            var y = event.touches[0].clientY-canvas.getBoundingClientRect().top;
+            canvasObj.moveTo(tempX,tempY);
+            canvasObj.lineTo(x,y);
+            canvasObj.stroke();
+            tempX = x;
+            tempY = y;
+            canvasObj.closePath();
+        }
+
+        function mouseDown(event){
+            tempX = event.clientX-canvas.getBoundingClientRect().left;
+            tempY = event.clientY-canvas.getBoundingClientRect().top;
+            //console.log(event.clientX-canvas.getBoundingClientRect().left,event.clientY-canvas.getBoundingClientRect().top);
+            flag = true;
+        }
+        
+        function moveCnvas(event){
+            //console.log(event);
+            if(flag){
+                if(mode==1){
+                    paint(event);
+                }else if(mode==0){
+                    eraser(event);  
+                }
+            }
+        }
+
+        function moveCanvasTouch(event){
+            if(flag){
+                if(mode==1){
+                    paintTouch(event);  
+                }else if(mode==0){
+                    eraserTouch(event);  
+                }
+            }
+        }
+
+        function mouseUp(event){
+            flag = false;
+        }
+
+        function fullScreenEvent(){
+            setSize();
+            canvasObj.putImageData(canTemp,0,0);
+        }
+
+    </script>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <img src="/static//file/icon.png" width="50" class="rounded me-2" alt="...">
+                <strong class="me-auto">MONDAIENSYU</strong>
+                <small>MONDAIENSYU</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="minutes">
+                経過時刻表示
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var time=0;
+        var minuteText = document.getElementById('minutes');
+
+        function showNotification(){
+            minuteText.innerText = `${Math.trunc(time/60)}分${time%60}秒が経過しました．`;
+            const toastLiveExample = document.getElementById('liveToast');
+            const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+            toastBootstrap.show();
+            AudioNotificationElm.play();
+        }
+
+        function second(){
+            time++;
+            if(time%90==0){
+                showNotification();
+            }
+        }
+    </script>
+
+    <div id="StartScreen">
+        <div class="box">
+            <div class="logo">
+                <p>MONEI ENSYU</p>
+            </div>
+            <br>
+            <div class="mes">
+                <p>問題演習システム</p>
+            </div>
+            <br>
+            <br>
+            <button type="button" class="btn btn-primary btn-lg btn-start" onclick="start();">スタート</button>
+        </div>
+    </div>
+
+    <script>
+        let timer;
+
+        function timerReset(){
+            time = 0;
+            timer = setInterval(second,1000);
+        }
+
+        function timerStop(){
+            clearInterval(timer);
+        }
+        
+        function start(){
+            const loadScreen = document.getElementById('StartScreen');
+            loadScreen.style.display = 'none';
+            playClickAudio('tap');
+            stopStatus = false;
+            timerReset();
+        }
+
+        var stopStatus = true;
+
+        function stop(){
+            if(stopStatus){
+                location.href = '/';
+            }else{
+                const loadScreen = document.getElementById('StartScreen');
+                loadScreen.style.display = 'block';
+                playClickAudio('tap');
+                stopStatus = true;
+                timerStop();
+            }
+        }
+    </script>
+
+    <div id="loadScreen">
+        <div class="mes2">
+            <a>・・・読み込み中・・・</a>
+            <br>
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function(){
+            const loadScreen = document.getElementById('loadScreen');
+            loadScreen.style.display = 'none';
+        };  
+    </script>
+
+</body>
+</html>
